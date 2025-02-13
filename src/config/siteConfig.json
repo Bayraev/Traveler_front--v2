@@ -1,0 +1,21 @@
+{
+  "map": {
+    "title": "OpenStreetMap",
+    "defaultCenter": {
+      "longitude": 2.3522,
+      "latitude": 48.8566
+    },
+    "defaultZoom": 13
+  },
+  "site": {
+    "title": "Traveler",
+    "description": "Discover the world through quests",
+    "logo": {
+      "text": "Traveler",
+      "icon": "compass"
+    }
+  },
+  "api": {
+    "baseUrl": "/api"
+  }
+}

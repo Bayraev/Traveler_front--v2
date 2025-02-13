@@ -1,0 +1,80 @@
+{
+  "users": [
+    {
+      "_id": "user1",
+      "username": "john_doe",
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+      "completedQuests": [
+        {
+          "_id": "sss",
+          "questId": "quest1",
+          "userId": "user1",
+          "photos": ["https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400"],
+          "coupon": "10% off at Café de Paris"
+        },
+        {
+          "_id": "sss",
+          "questId": "quest1",
+          "userId": "user1",
+          "photos": ["https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400"],
+          "coupon": "10% off at Café de Paris"
+        },
+        {
+          "_id": "sss",
+          "questId": "quest1",
+          "userId": "user1",
+          "photos": ["https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400"],
+          "coupon": "10% off at Café de Paris"
+        }
+      ],
+      "friends": ["user2"],
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "_id": "user2",
+      "username": "jane_smith",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+      "completedQuests": [],
+      "friends": ["user1"],
+      "createdAt": "2024-01-02T00:00:00.000Z",
+      "updatedAt": "2024-01-02T00:00:00.000Z"
+    }
+  ],
+  "quests": [
+    {
+      "_id": "quest1",
+      "locationId": "loc1",
+      "description": "Take a photo at the Eiffel Tower",
+      "photoUrl": "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?w=800",
+      "coupon": "10% off at Café de Paris"
+    },
+    {
+      "_id": "quest2",
+      "locationId": "loc2",
+      "description": "Visit the Louvre Museum",
+      "photoUrl": "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800",
+      "coupon": "Free audio guide"
+    }
+  ],
+  "locations": [
+    {
+      "_id": "loc1",
+      "name": "Eiffel Tower",
+      "latitude": 48.8584,
+      "longitude": 2.2945,
+      "continent": "Europe",
+      "country": "France",
+      "city": "Paris"
+    },
+    {
+      "_id": "loc2",
+      "name": "Louvre Museum",
+      "latitude": 48.8606,
+      "longitude": 2.3376,
+      "continent": "Europe",
+      "country": "France",
+      "city": "Paris"
+    }
+  ]
+}
