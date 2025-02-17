@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Compass, Menu, X, User, Users, Map, CheckSquare, LogOut } from 'lucide-react';
-import { RootState } from '../store/store';
-import { logout } from '../store/slices/userSlice';
+import { RootState } from '../app/store';
+import { logout } from '../app/features/userSlice';
 import siteConfig from '../config/siteConfig.json';
 
 const Header = () => {

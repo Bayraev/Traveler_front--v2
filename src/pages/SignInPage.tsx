@@ -1,31 +1,30 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { fetchCurrentUser } from '../store/slices/userSlice';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { signIn } from '../app/features/userSlice';
 import { Compass } from 'lucide-react';
+import { AppDispatch, RootState } from '../app/store';
+import { UserDTO } from '../types';
 
 const SignInPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const apiError = useSelector((state: RootState) => state.user.error);
+  const dispatch: AppDispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
+    alert('submit');
     e.preventDefault();
     setError('');
 
-    try {
-      // For demo, we'll use the mock data
-      if (username === 'john_doe' && password === 'password') {
-        await dispatch(fetchCurrentUser()).unwrap();
-        navigate('/');
-      } else {
-        setError('Неверное имя пользователя или пароль');
-      }
-    } catch (err) {
-      setError('Ошибка при входе');
+    const credentials: UserDTO = { username, password };
+
+    if (apiError) {
+      setError(apiError || 'Непредвиденная ошибка');
     }
+
+    await dispatch(signIn(credentials));
   };
 
   return (
@@ -35,9 +34,7 @@ const SignInPage = () => {
           <div className="flex justify-center">
             <Compass className="h-12 w-12 text-primary" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Вход в аккаунт
-          </h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Вход в аккаунт</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Или{' '}
             <Link to="/sign/up" className="font-medium text-primary hover:text-primary/80">
@@ -87,8 +84,7 @@ const SignInPage = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
               Войти
             </button>
           </div>

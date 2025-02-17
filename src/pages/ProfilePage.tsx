@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { RootState } from '../store/store';
+import { RootState } from '../app/store';
 import { User, Users, Trophy } from 'lucide-react';
 
 const ProfilePage = () => {

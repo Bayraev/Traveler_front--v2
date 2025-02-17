@@ -4,9 +4,9 @@ import { Map as OLMap, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import { fromLonLat } from 'ol/proj';
-import { RootState } from '../store/store';
-import { setMapPosition } from '../store/slices/mapSlice';
-import { rollNewQuest } from '../store/slices/questSlice';
+import { RootState } from '../app/store';
+import { setMapPosition } from '../app/features/mapSlice';
+import { rollNewQuest } from '../app/features/questSlice';
 import { MapPinned } from 'lucide-react';
 import siteConfig from '../config/siteConfig.json';
 

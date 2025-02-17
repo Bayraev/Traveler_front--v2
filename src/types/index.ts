@@ -1,5 +1,10 @@
 import { ObjectId } from './utils';
 
+export interface UserDTO {
+  username: string;
+  password: string;
+}
+
 export interface User {
   _id: ObjectId;
   username: string;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store/store';
-import { fetchFriends, addFriend } from '../store/slices/friendSlice';
+import { RootState } from '../app/store';
+import { fetchFriends, addFriend } from '../app/features/friendSlice';
 import { UserPlus, Users } from 'lucide-react';
 
 const FriendsPage = () => {

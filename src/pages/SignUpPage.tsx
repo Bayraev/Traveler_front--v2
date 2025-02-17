@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Compass } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../app/store';
+import { signUp } from '../app/features/userSlice';
+import { UserDTO } from '../types';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,12 +22,8 @@ const SignUpPage = () => {
       return;
     }
 
-    try {
-      // For demo purposes, we'll just redirect to sign in
-      navigate('/sign/in');
-    } catch (err) {
-      setError('Ошибка при регистрации');
-    }
+    const credentials: UserDTO = { username, password };
+    await dispatch(signUp(credentials));
   };
 
   return (
@@ -33,9 +33,7 @@ const SignUpPage = () => {
           <div className="flex justify-center">
             <Compass className="h-12 w-12 text-primary" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Регистрация
-          </h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Регистрация</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Уже есть аккаунт?{' '}
             <Link to="/sign/in" className="font-medium text-primary hover:text-primary/80">
@@ -100,8 +98,7 @@ const SignUpPage = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
               Зарегистрироваться
             </button>
           </div>
