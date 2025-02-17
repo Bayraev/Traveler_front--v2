@@ -3,6 +3,7 @@ import type { User, UserDTO } from '../../types';
 import type { ApiError } from '../../types/utils';
 import AuthService from '../services/authService';
 import { toast } from 'sonner';
+import Cookies from 'js-cookie';
 
 interface UserState {
   currentUser: User | null;
@@ -21,7 +22,8 @@ export const signIn = createAsyncThunk(
   async (credentials: UserDTO, { rejectWithValue }) => {
     try {
       const response = await AuthService.login(credentials.username, credentials.password);
-      return response.data.user;
+      // Return the user data directly from response.data
+      return response.data.data;
     } catch (error: any) {
       const apiError = error.response?.data as ApiError;
       const errorMessage = apiError?.error?.message || 'Не удалось войти в аккаунт';
@@ -35,7 +37,7 @@ export const signUp = createAsyncThunk(
   async (credentials: UserDTO, { rejectWithValue }) => {
     try {
       const response = await AuthService.register(credentials.username, credentials.password);
-      return response.data.user;
+      return response.data.data;
     } catch (error: any) {
       const apiError = error.response?.data as ApiError;
       const errorMessage = apiError?.error?.message || 'Не удалось зарегистрироваться';
@@ -51,6 +53,10 @@ const userSlice = createSlice({
     logout: (state) => {
       state.currentUser = null;
       toast.success('Вы вышли из аккаунта');
+
+      // Remove user data from cookies
+      Cookies.remove('username');
+      Cookies.remove('password');
     },
   },
   extraReducers: (builder) => {
@@ -63,8 +69,14 @@ const userSlice = createSlice({
         state.loading = false;
         toast.success('Успешно вошли в аккаунт!');
 
-        console.log(action.payload);
+        // Save user data to cookies
+        Cookies.set('username', JSON.stringify(action.payload), { expires: 7 }); // 7 days expiry
+        Cookies.set('password', JSON.stringify(action.payload), { expires: 7 }); // 7 days expiry
+
+        const usernameCookie = Cookies.get('username');
         state.currentUser = action.payload;
+
+        console.log(usernameCookie, state.currentUser, action.payload);
       })
       .addCase(signIn.rejected, (state, action) => {
         state.loading = false;

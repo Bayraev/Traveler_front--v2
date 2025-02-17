@@ -14,6 +14,7 @@ export interface User {
   friends: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
+  id?: string;
 }
 
 export interface Location {

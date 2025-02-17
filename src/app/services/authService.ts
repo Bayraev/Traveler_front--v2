@@ -1,18 +1,20 @@
 import $api from '../http/http';
 import { AxiosResponse } from 'axios';
 import { User } from '../../types';
-
-interface AuthResponse {
-  user: User;
-  accessToken: string;
-}
+import { ApiResponse } from '../../types/utils';
 
 export default class AuthService {
-  static async login(username: string, password: string): Promise<AxiosResponse<AuthResponse>> {
-    return $api.post<AuthResponse>('/signin', { username, password });
+  static async login(
+    username: string,
+    password: string,
+  ): Promise<AxiosResponse<ApiResponse<User>>> {
+    return $api.post<ApiResponse<User>>('/signin', { username, password });
   }
 
-  static async register(username: string, password: string): Promise<AxiosResponse<AuthResponse>> {
-    return $api.post<AuthResponse>('/signup', { username, password });
+  static async register(
+    username: string,
+    password: string,
+  ): Promise<AxiosResponse<ApiResponse<User>>> {
+    return $api.post<ApiResponse<User>>('/signup', { username, password });
   }
 }

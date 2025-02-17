@@ -1,7 +1,5 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from './app/store';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MainPage from './pages/MainPage';
@@ -10,10 +8,15 @@ import FriendsPage from './pages/FriendsPage';
 import QuestsPage from './pages/QuestsPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import Cookies from 'js-cookie';
 import { Toaster } from 'sonner';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const user = useSelector((state: RootState) => state.user.currentUser);
+  const usernameCookie = Cookies.get('username');
+  const passwordCookie = Cookies.get('password');
+  const user =
+    (usernameCookie ? JSON.parse(usernameCookie) : null) &&
+    (passwordCookie ? JSON.parse(passwordCookie) : null);
 
   if (!user) {
     return <Navigate to="/sign/in" replace />;
