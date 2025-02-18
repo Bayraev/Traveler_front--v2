@@ -16,6 +16,6 @@ export default class FriendService {
     userId: string,
     friendUsername: string,
   ): Promise<AxiosResponse<ApiResponse<User>>> {
-    return $api.post<ApiResponse<User>>(`/users/${userId}/friends`, { username: friendUsername });
+    return $api.post<ApiResponse<User>>(`/users/${userId}/add-friend/${friendUsername}`);
   }
 }

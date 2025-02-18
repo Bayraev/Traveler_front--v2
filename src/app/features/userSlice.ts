@@ -4,6 +4,7 @@ import type { ApiError } from '../../types/utils';
 import AuthService from '../services/authService';
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
+import { API_URL_STATIC } from '../http/http';
 
 interface UserState {
   currentUser: User | null;
@@ -16,6 +17,10 @@ const initialState: UserState = {
   loading: false,
   error: null,
 };
+
+interface SignUpPayload extends UserDTO {
+  avatar: File;
+}
 
 export const signIn = createAsyncThunk(
   'user/signIn',
@@ -34,13 +39,27 @@ export const signIn = createAsyncThunk(
 
 export const signUp = createAsyncThunk(
   'user/signUp',
-  async (credentials: UserDTO, { rejectWithValue }) => {
+  async ({ username, password, avatar }: SignUpPayload, { rejectWithValue }) => {
     try {
-      const response = await AuthService.register(credentials.username, credentials.password);
+      const response = await AuthService.register(username, password, avatar);
       return response.data.data;
     } catch (error: any) {
       const apiError = error.response?.data as ApiError;
       const errorMessage = apiError?.error?.message || 'Не удалось зарегистрироваться';
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const updateAvatar = createAsyncThunk(
+  'user/updateAvatar',
+  async ({ userId, avatar }: { userId: string; avatar: File }, { rejectWithValue }) => {
+    try {
+      const response = await AuthService.updateAvatar(userId, avatar);
+      return response.data.data;
+    } catch (error: any) {
+      const apiError = error.response?.data as ApiError;
+      const errorMessage = apiError?.error?.message || 'Не удалось обновить аватар';
       return rejectWithValue(errorMessage);
     }
   },
@@ -74,7 +93,10 @@ const userSlice = createSlice({
         Cookies.set('password', JSON.stringify(action.payload), { expires: 7 }); // 7 days expiry
 
         const usernameCookie = Cookies.get('username');
+
+        // add user to state
         state.currentUser = action.payload;
+        state.currentUser.avatar = `${API_URL_STATIC}${action.payload.avatar}`;
 
         console.log(usernameCookie, state.currentUser, action.payload);
       })
@@ -100,6 +122,27 @@ const userSlice = createSlice({
       state.error = (action.payload as string) || 'Не удалось зарегистрироваться';
 
       toast.error((action.payload as string) || 'Не удалось зарегистрироваться');
+    });
+
+    builder.addCase(updateAvatar.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+
+    builder.addCase(updateAvatar.fulfilled, (state, action) => {
+      state.loading = false;
+      state.currentUser = action.payload;
+
+      const avatar = `${API_URL_STATIC}${action.payload.avatar}`;
+      console.log(avatar);
+      state.currentUser.avatar = avatar;
+      toast.success('Аватар успешно обновлен');
+    });
+
+    builder.addCase(updateAvatar.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+      toast.error(action.payload as string);
     });
   },
 });

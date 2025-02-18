@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { User } from '../../types';
 import FriendService from '../services/friendService';
 import { toast } from 'sonner';
+import { API_URL_STATIC } from '../http/http';
 
 interface FriendState {
   friends: User[];
@@ -41,7 +42,11 @@ const friendSlice = createSlice({
       })
       .addCase(fetchFriends.fulfilled, (state, action) => {
         state.loading = false;
-        state.friends = action.payload;
+        state.friends = action.payload.map((friend) => ({
+          ...friend,
+          avatar: `${API_URL_STATIC}${friend.avatar}`,
+        }));
+
         state.error = null;
       })
       .addCase(fetchFriends.rejected, (state) => {
@@ -56,7 +61,10 @@ const friendSlice = createSlice({
       })
       .addCase(addFriend.fulfilled, (state, action) => {
         state.loading = false;
-        state.friends.push(action.payload);
+        state.friends.push({
+          ...action.payload,
+          avatar: `${API_URL_STATIC}${action.payload.avatar}`,
+        });
         toast.success('Друг успешно добавлен!');
       })
       .addCase(addFriend.rejected, (state) => {

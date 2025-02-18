@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Compass } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Compass, Camera, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
 import { signUp } from '../app/features/userSlice';
-import { UserDTO } from '../types';
+import { validateImage } from '../utils/fileValidation';
+import { toast } from 'sonner';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImage(file);
+    if (!validation.isValid) {
+      toast.error(validation.error);
+      return;
+    }
+
+    setAvatar(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +41,17 @@ const SignUpPage = () => {
       return;
     }
 
-    const credentials: UserDTO = { username, password };
-    await dispatch(signUp(credentials));
+    if (!avatar) {
+      setError('Пожалуйста, добавьте аватар');
+      return;
+    }
+
+    try {
+      await dispatch(signUp({ username, password, avatar })).unwrap();
+      navigate('/');
+    } catch (err) {
+      setError(err as string);
+    }
   };
 
   return (
@@ -47,6 +75,41 @@ const SignUpPage = () => {
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
+          <div className="flex justify-center">
+            <div className="relative">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt="Avatar preview"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <Camera className="h-8 w-8 text-gray-400" />
+                )}
+              </div>
+              {avatarPreview && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAvatar(null);
+                    setAvatarPreview('');
+                  }}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1">
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">

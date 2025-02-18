@@ -3,6 +3,7 @@ import { store } from '../store';
 import { logout } from '../features/userSlice';
 
 export const API_URL = `http://localhost:5000/api`;
+export const API_URL_STATIC = `http://localhost:5000`;
 
 const $api = axios.create({
   baseURL: API_URL,
