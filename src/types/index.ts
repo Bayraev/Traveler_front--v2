@@ -40,14 +40,18 @@ export interface Quest {
   description: string;
   photoUrl: string;
   coupon: string;
+  completedAt?: Date;
 }
 
 export interface QuestCompletion {
   _id: ObjectId;
-  questId: ObjectId;
-  userId: ObjectId;
+  country: string;
+  city: string;
+  description: string;
+  photoUrl: string;
   photos: string[];
-  completedAt: Date;
+  coupon: string;
+  completedAt?: Date;
 }
 
 export interface Friend {
