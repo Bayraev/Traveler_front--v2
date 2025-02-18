@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../app/store';
+import { AppDispatch, RootState } from '../app/store';
 import { fetchFriends, addFriend } from '../app/features/friendSlice';
 import { UserPlus, Users } from 'lucide-react';
 
 const FriendsPage = () => {
   const [newFriendUsername, setNewFriendUsername] = useState('');
   const [error, setError] = useState('');
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const { friends, loading } = useSelector((state: RootState) => state.friend);
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   useEffect(() => {
+    console.log(currentUser);
     if (currentUser) {
       dispatch(fetchFriends(currentUser._id));
     }
@@ -21,11 +22,26 @@ const FriendsPage = () => {
     e.preventDefault();
     setError('');
 
+    if (!newFriendUsername.trim()) {
+      setError('Введите имя пользователя');
+      return;
+    }
+
+    if (!currentUser?._id) {
+      setError('Необходимо авторизоваться');
+      return;
+    }
+
     try {
-      await dispatch(addFriend(newFriendUsername)).unwrap();
+      await dispatch(
+        addFriend({
+          userId: currentUser._id,
+          username: newFriendUsername,
+        }),
+      ).unwrap();
       setNewFriendUsername('');
     } catch (err) {
-      setError('Пользователь не найден');
+      setError('Не удалось добавить пользователя');
     }
   };
 

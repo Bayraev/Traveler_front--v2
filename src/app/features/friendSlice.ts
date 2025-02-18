@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { User } from '../../types';
-import mockData from '../../mocks/data.json';
+import FriendService from '../services/friendService';
+import { toast } from 'sonner';
 
 interface FriendState {
   friends: User[];
@@ -11,28 +12,20 @@ interface FriendState {
 const initialState: FriendState = {
   friends: [],
   loading: false,
-  error: null
+  error: null,
 };
 
-export const fetchFriends = createAsyncThunk(
-  'friend/fetchFriends',
-  async (userId: string) => {
-    // Simulating API call with mock data
-    const friends = mockData.users.filter(user => 
-      user._id !== userId && mockData.users[0].friends.includes(user._id)
-    );
-    return friends;
-  }
-);
+export const fetchFriends = createAsyncThunk('friend/fetchFriends', async (userId: string) => {
+  const response = await FriendService.getFriends(userId);
+  return response.data.data;
+});
 
 export const addFriend = createAsyncThunk(
   'friend/addFriend',
-  async (username: string) => {
-    // Simulating API call with mock data
-    const friend = mockData.users.find(user => user.username === username);
-    if (!friend) throw new Error('User not found');
-    return friend;
-  }
+  async ({ userId, username }: { userId: string; username: string }) => {
+    const response = await FriendService.addFriend(userId, username);
+    return response.data.data;
+  },
 );
 
 const friendSlice = createSlice({
@@ -41,6 +34,7 @@ const friendSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch friends cases
       .addCase(fetchFriends.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -48,11 +42,14 @@ const friendSlice = createSlice({
       .addCase(fetchFriends.fulfilled, (state, action) => {
         state.loading = false;
         state.friends = action.payload;
+        state.error = null;
       })
-      .addCase(fetchFriends.rejected, (state, action) => {
+      .addCase(fetchFriends.rejected, (state) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch friends';
+        state.error = 'Не удалось загрузить список друзей';
+        toast.error('Не удалось загрузить список друзей');
       })
+      // Add friend cases
       .addCase(addFriend.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -60,12 +57,14 @@ const friendSlice = createSlice({
       .addCase(addFriend.fulfilled, (state, action) => {
         state.loading = false;
         state.friends.push(action.payload);
+        toast.success('Друг успешно добавлен!');
       })
-      .addCase(addFriend.rejected, (state, action) => {
+      .addCase(addFriend.rejected, (state) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to add friend';
+        state.error = 'Не удалось добавить друга';
+        toast.error('Не удалось добавить друга');
       });
-  }
+  },
 });
 
 export default friendSlice.reducer;
