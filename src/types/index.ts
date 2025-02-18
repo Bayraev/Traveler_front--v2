@@ -35,7 +35,8 @@ export interface MapState {
 
 export interface Quest {
   _id: ObjectId;
-  locationId: ObjectId;
+  country: string;
+  city: string;
   description: string;
   photoUrl: string;
   coupon: string;

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { RootState } from '../app/store';
-import { User, Users, Trophy } from 'lucide-react';
+import { AppDispatch, RootState } from '../app/store';
+import { Users, Trophy } from 'lucide-react';
+import { fetchCurrentQuest } from '../app/features/questSlice';
 
 const ProfilePage = () => {
   const user = useSelector((state: RootState) => state.user.currentUser);
@@ -10,6 +11,13 @@ const ProfilePage = () => {
   const [isCompletionPopupOpen, setIsCompletionPopupOpen] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [comments, setComments] = useState('');
+  const dispatch: AppDispatch = useDispatch();
+  // Fetch current quest on component mount
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(fetchCurrentQuest(user._id));
+    }
+  }, [user?._id]);
 
   if (!user) return null;
 
@@ -81,7 +89,9 @@ const ProfilePage = () => {
                 alt="Место задания"
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
-              <p className="text-gray-600 mb-4">{currentQuest.description}</p>
+              <p className="text-gray-600 mb-4">
+                {`${currentQuest.description}, ${currentQuest.country}, ${currentQuest.city}`}
+              </p>
               <button onClick={() => setIsCompletionPopupOpen(true)} className="btn btn-primary">
                 Отметить выполненным
               </button>

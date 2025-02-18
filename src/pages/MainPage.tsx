@@ -1,22 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Map as OLMap, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import { fromLonLat } from 'ol/proj';
-import { RootState } from '../app/store';
+import { AppDispatch, RootState } from '../app/store';
 import { setMapPosition } from '../app/features/mapSlice';
-import { rollNewQuest } from '../app/features/questSlice';
+import { rollNewQuest, closeTaskPopup } from '../app/features/questSlice';
 import { MapPinned } from 'lucide-react';
 import siteConfig from '../config/siteConfig.json';
+import { toast } from 'sonner';
 
 const MainPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<OLMap | null>(null);
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const mapState = useSelector((state: RootState) => state.map);
-  const [isTaskPopupOpen, setIsTaskPopupOpen] = useState(false);
-  const currentQuest = useSelector((state: RootState) => state.quest.currentQuest);
+  const { currentQuest, isTaskPopupOpen } = useSelector((state: RootState) => state.quest);
+  const { currentUser } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -58,11 +59,15 @@ const MainPage = () => {
   }, []);
 
   const handleRollTask = async () => {
+    if (!currentUser?._id) {
+      toast.error('Необходимо авторизоваться');
+      return;
+    }
+
     try {
-      await dispatch(rollNewQuest()).unwrap();
-      setIsTaskPopupOpen(true);
+      await dispatch(rollNewQuest(currentUser._id));
     } catch (error) {
-      console.error('Не удалось выкрутить квест!:', error);
+      toast.error('Не удалось выкрутить квест, непредвиденная ошибка..');
     }
   };
 
@@ -82,7 +87,9 @@ const MainPage = () => {
       {isTaskPopupOpen && currentQuest && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Новое задание</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {currentQuest.country}, {currentQuest.city}
+            </h2>
             <img
               src={currentQuest.photoUrl}
               alt="Место задания"
@@ -90,7 +97,7 @@ const MainPage = () => {
             />
             <p className="text-gray-600 mb-6">{currentQuest.description}</p>
             <div className="flex justify-end space-x-4">
-              <button onClick={() => setIsTaskPopupOpen(false)} className="btn btn-secondary">
+              <button onClick={() => dispatch(closeTaskPopup())} className="btn btn-secondary">
                 Принять
               </button>
               <button onClick={handleRollTask} className="btn btn-primary">
