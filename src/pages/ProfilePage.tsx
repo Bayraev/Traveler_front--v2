@@ -3,13 +3,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { AppDispatch, RootState } from '../app/store';
 import { Users, Trophy } from 'lucide-react';
-import { fetchCurrentQuest } from '../app/features/questSlice';
+import { fetchCurrentQuest, completeQuest } from '../app/features/questSlice';
+import { validateImage } from '../utils/fileValidation';
+import { toast } from 'sonner';
 
 const ProfilePage = () => {
   const user = useSelector((state: RootState) => state.user.currentUser);
   const currentQuest = useSelector((state: RootState) => state.quest.currentQuest);
   const [isCompletionPopupOpen, setIsCompletionPopupOpen] = useState(false);
-  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [selectedPhotos, setSelectedPhotos] = useState<Array<{ file: File; preview: string }>>([]);
   const [comments, setComments] = useState('');
   const dispatch: AppDispatch = useDispatch();
   // Fetch current quest on component mount
@@ -25,16 +27,61 @@ const ProfilePage = () => {
     const files = e.target.files;
     if (!files) return;
 
-    // Convert files to URLs (in a real app, you'd upload these to a server)
-    const newPhotos = Array.from(files).map((file) => URL.createObjectURL(file));
-    setSelectedPhotos((prev) => [...prev, ...newPhotos].slice(0, 5));
+    // Convert files to array and validate each
+    const newFiles = Array.from(files);
+
+    for (const file of newFiles) {
+      const validation = validateImage(file);
+      if (!validation.isValid) {
+        toast.error(validation.error);
+        return;
+      }
+    }
+
+    // Check total number of images (existing + new)
+    if (selectedPhotos.length + newFiles.length > 5) {
+      toast.error('Максимальное количество фотографий - 5');
+      return;
+    }
+
+    // Create object URLs for preview
+    const newPhotos = newFiles.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setSelectedPhotos((prev) => [...prev, ...newPhotos]);
   };
 
-  const handleSubmitCompletion = () => {
-    // Here you would submit the completion to your backend
-    setIsCompletionPopupOpen(false);
-    setSelectedPhotos([]);
-    setComments('');
+  const handleSubmitCompletion = async () => {
+    if (!user?._id) {
+      toast.error('Необходимо авторизоваться');
+      return;
+    }
+
+    if (selectedPhotos.length === 0) {
+      toast.error('Добавьте хотя бы одну фотографию');
+      return;
+    }
+
+    try {
+      await dispatch(
+        completeQuest({
+          userId: user._id,
+          images: selectedPhotos.map((photo) => photo.file),
+          description: comments,
+        }),
+      ).unwrap();
+
+      // Clean up object URLs
+      selectedPhotos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+
+      setIsCompletionPopupOpen(false);
+      setSelectedPhotos([]);
+      setComments('');
+    } catch (error) {
+      console.error('Failed to complete quest:', error);
+    }
   };
 
   return (
@@ -123,7 +170,7 @@ const ProfilePage = () => {
                   {selectedPhotos.map((photo, index) => (
                     <div key={index} className="relative">
                       <img
-                        src={photo}
+                        src={photo.preview}
                         alt={`Фото ${index + 1}`}
                         className="w-20 h-20 object-cover rounded"
                       />

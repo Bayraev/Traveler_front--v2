@@ -40,6 +40,20 @@ export const fetchCompletedQuests = createAsyncThunk(
   },
 );
 
+interface CompleteQuestPayload {
+  userId: string;
+  images: File[];
+  description: string;
+}
+
+export const completeQuest = createAsyncThunk(
+  'quest/complete',
+  async ({ userId, images, description }: CompleteQuestPayload) => {
+    const response = await QuestService.completeQuest(userId, images, description);
+    return response.data.data;
+  },
+);
+
 const questSlice = createSlice({
   name: 'quest',
   initialState,
@@ -98,6 +112,23 @@ const questSlice = createSlice({
       .addCase(fetchCompletedQuests.rejected, (state) => {
         state.loading = false;
         state.error = 'Не удалось загрузить историю заданий';
+      })
+      // Complete quest cases
+      .addCase(completeQuest.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(completeQuest.fulfilled, (state) => {
+        state.loading = false;
+        state.currentQuest = null;
+        state.isTaskPopupOpen = false;
+        state.error = null;
+        toast.success('Задание успешно выполнено!');
+      })
+      .addCase(completeQuest.rejected, (state) => {
+        state.loading = false;
+        state.error = 'Не удалось отправить подтверждение';
+        toast.error('Не удалось отправить подтверждение');
       });
   },
 });
