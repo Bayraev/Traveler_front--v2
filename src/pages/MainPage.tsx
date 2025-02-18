@@ -6,7 +6,7 @@ import OSM from 'ol/source/OSM';
 import { fromLonLat } from 'ol/proj';
 import { AppDispatch, RootState } from '../app/store';
 import { setMapPosition } from '../app/features/mapSlice';
-import { rollNewQuest, closeTaskPopup } from '../app/features/questSlice';
+import { rollNewQuest, closeTaskPopup, fetchCurrentQuest } from '../app/features/questSlice';
 import { MapPinned } from 'lucide-react';
 import siteConfig from '../config/siteConfig.json';
 import { toast } from 'sonner';
@@ -70,6 +70,13 @@ const MainPage = () => {
       toast.error('Не удалось выкрутить квест, непредвиденная ошибка..');
     }
   };
+
+  // Fetch current quest on component mount
+  useEffect(() => {
+    if (currentUser?._id) {
+      dispatch(fetchCurrentQuest(currentUser._id));
+    }
+  }, [currentUser?._id]);
 
   return (
     <div className="relative h-[calc(100vh-4rem)]">

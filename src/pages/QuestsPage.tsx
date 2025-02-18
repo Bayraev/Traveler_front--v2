@@ -39,9 +39,9 @@ const QuestsPage = () => {
             {completedQuests?.map((completion) => (
               <div key={completion._id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="aspect-w-16 aspect-h-9">
-                  {completion.photos?.length > 0 && (
+                  {completion.images?.length > 0 && (
                     <img
-                      src={completion.photos[0]}
+                      src={completion.images[0]}
                       alt="Фото выполненного задания"
                       className="object-cover w-full h-48"
                     />

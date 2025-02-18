@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { fetchFriends, addFriend } from '../app/features/friendSlice';
+import {
+  fetchFriends,
+  addFriend,
+  fetchUserQuests,
+  clearSelectedUserQuests,
+} from '../app/features/friendSlice';
 import { UserPlus, Users } from 'lucide-react';
+import UserProfileModal from '../components/UserProfileModal';
+import { Friend } from '../types';
 
 const FriendsPage = () => {
   const [newFriendUsername, setNewFriendUsername] = useState('');
   const [error, setError] = useState('');
   const dispatch: AppDispatch = useDispatch();
-  const { friends, loading } = useSelector((state: RootState) => state.friend);
+  const { friends, loading, selectedUserQuests } = useSelector((state: RootState) => state.friend);
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
+  const [selectedUser, setSelectedUser] = useState<Friend | null>(null);
 
   useEffect(() => {
     console.log(currentUser);
@@ -43,6 +51,16 @@ const FriendsPage = () => {
     } catch (err) {
       setError('Не удалось добавить пользователя');
     }
+  };
+
+  const handleUserClick = async (user: Friend) => {
+    setSelectedUser(user);
+    dispatch(fetchUserQuests(user.userId));
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUser(null);
+    dispatch(clearSelectedUserQuests());
   };
 
   return (
@@ -85,7 +103,8 @@ const FriendsPage = () => {
             {friends.map((friend) => (
               <div
                 key={friend._id}
-                className="bg-white rounded-lg shadow-md overflow-hidden flex items-center p-4">
+                className="bg-white rounded-lg shadow-md overflow-hidden flex items-center p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleUserClick(friend)}>
                 <img
                   src={friend.avatar}
                   alt={friend.username}
@@ -94,12 +113,21 @@ const FriendsPage = () => {
                 <div className="ml-4">
                   <h3 className="font-semibold text-lg">{friend.username}</h3>
                   <p className="text-sm text-gray-500">
-                    В системе с {new Date(friend.createdAt).toLocaleDateString('ru-RU')}
+                    Добавлен в друзья {new Date(friend.addedAt).toLocaleDateString('ru-RU')}
                   </p>
                 </div>
               </div>
             ))}
           </div>
+        )}
+
+        {selectedUser && (
+          <UserProfileModal
+            user={selectedUser}
+            completedQuests={selectedUserQuests}
+            isOpen={!!selectedUser}
+            onClose={handleCloseModal}
+          />
         )}
       </div>
     </div>

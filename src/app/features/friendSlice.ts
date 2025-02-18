@@ -1,17 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { User } from '../../types';
+import type { User, Friend, QuestCompletion } from '../../types';
 import FriendService from '../services/friendService';
 import { toast } from 'sonner';
 import { API_URL_STATIC } from '../http/http';
+import QuestService from '../services/questService';
 
 interface FriendState {
-  friends: User[];
+  friends: Friend[];
+  selectedUserQuests: QuestCompletion[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: FriendState = {
   friends: [],
+  selectedUserQuests: [],
   loading: false,
   error: null,
 };
@@ -29,10 +32,22 @@ export const addFriend = createAsyncThunk(
   },
 );
 
+export const fetchUserQuests = createAsyncThunk(
+  'friend/fetchUserQuests',
+  async (userId: string) => {
+    const response = await QuestService.getCompletedQuests(userId);
+    return response.data.data;
+  },
+);
+
 const friendSlice = createSlice({
   name: 'friend',
   initialState,
-  reducers: {},
+  reducers: {
+    clearSelectedUserQuests: (state) => {
+      state.selectedUserQuests = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Fetch friends cases
@@ -46,7 +61,6 @@ const friendSlice = createSlice({
           ...friend,
           avatar: `${API_URL_STATIC}${friend.avatar}`,
         }));
-
         state.error = null;
       })
       .addCase(fetchFriends.rejected, (state) => {
@@ -71,8 +85,25 @@ const friendSlice = createSlice({
         state.loading = false;
         state.error = 'Не удалось добавить друга';
         toast.error('Не удалось добавить друга');
+      })
+      // Fetch user quests cases
+      .addCase(fetchUserQuests.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserQuests.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedUserQuests = action.payload;
+
+        state.error = null;
+      })
+      .addCase(fetchUserQuests.rejected, (state) => {
+        state.loading = false;
+        state.error = 'Не удалось загрузить достижения пользователя';
+        toast.error('Не удалось загрузить достижения пользователя');
       });
   },
 });
 
+export const { clearSelectedUserQuests } = friendSlice.actions;
 export default friendSlice.reducer;
