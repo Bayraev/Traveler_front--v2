@@ -96,7 +96,8 @@ const userSlice = createSlice({
 
         // add user to state
         state.currentUser = action.payload;
-        state.currentUser.avatar = `${API_URL_STATIC}${action.payload.avatar}`;
+        console.log(action.payload.avatar);
+        // state.currentUser.avatar = `${API_URL_STATIC}${action.payload.avatar}`;
 
         console.log(usernameCookie, state.currentUser, action.payload);
       })
@@ -132,10 +133,7 @@ const userSlice = createSlice({
     builder.addCase(updateAvatar.fulfilled, (state, action) => {
       state.loading = false;
       state.currentUser = action.payload;
-
-      const avatar = `${API_URL_STATIC}${action.payload.avatar}`;
-      console.log(avatar);
-      state.currentUser.avatar = avatar;
+      console.log(action.payload.avatar);
       toast.success('Аватар успешно обновлен');
     });
 

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { User, Friend, QuestCompletion } from '../../types';
+import type { Friend, QuestCompletion } from '../../types';
 import FriendService from '../services/friendService';
 import { toast } from 'sonner';
 import { API_URL_STATIC } from '../http/http';
@@ -77,7 +77,6 @@ const friendSlice = createSlice({
         state.loading = false;
         state.friends.push({
           ...action.payload,
-          avatar: `${API_URL_STATIC}${action.payload.avatar}`,
         });
         toast.success('Друг успешно добавлен!');
       })
