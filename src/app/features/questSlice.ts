@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { Quest, QuestCompletion } from '../../types';
 import QuestService from '../services/questService';
 import { toast } from 'sonner';
+import type { ApiError } from '../../types/utils';
 
 interface QuestState {
   currentQuest: Quest | null;
@@ -20,23 +21,47 @@ const initialState: QuestState = {
 };
 
 // Fetch random quest
-export const rollNewQuest = createAsyncThunk('quest/rollNew', async (userId: string) => {
-  const response = await QuestService.getRandomQuest(userId);
-  return response.data.data;
-});
+export const rollNewQuest = createAsyncThunk(
+  'quest/rollNew',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await QuestService.getRandomQuest(userId);
+      return response.data;
+    } catch (error: any) {
+      const apiError = error.response?.data as ApiError['error'];
+      const errorMessage = apiError?.message || 'Не удалось получить задание';
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
 
 // Fetch current active quest
-export const fetchCurrentQuest = createAsyncThunk('quest/fetchCurrent', async (userId: string) => {
-  const response = await QuestService.getCurrentQuest(userId);
-  return response.data.data;
-});
+export const fetchCurrentQuest = createAsyncThunk(
+  'quest/fetchCurrent',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await QuestService.getCurrentQuest(userId);
+      return response.data;
+    } catch (error: any) {
+      const apiError = error.response?.data as ApiError['error'];
+      const errorMessage = apiError?.message || 'Не удалось загрузить текущее задание';
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
 
 // Fetch completed quests history
 export const fetchCompletedQuests = createAsyncThunk(
   'quest/fetchCompleted',
-  async (userId: string) => {
-    const response = await QuestService.getCompletedQuests(userId);
-    return response.data.data;
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await QuestService.getCompletedQuests(userId);
+      return response.data;
+    } catch (error: any) {
+      const apiError = error.response?.data as ApiError['error'];
+      const errorMessage = apiError?.message || 'Не удалось загрузить историю заданий';
+      return rejectWithValue(errorMessage);
+    }
   },
 );
 
@@ -75,15 +100,16 @@ const questSlice = createSlice({
       })
       .addCase(rollNewQuest.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentQuest = action.payload;
+        state.currentQuest = action.payload.data;
         state.isTaskPopupOpen = true;
         state.error = null;
-        toast.success('Новое задание получено!');
+        toast.success(action.payload.message || 'Новое задание получено');
       })
       .addCase(rollNewQuest.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
-        toast.error('Не удалось получить задание');
+        const errorMessage = action.payload as string;
+        state.error = errorMessage;
+        toast.error(errorMessage);
       })
       // Fetch current quest cases
       .addCase(fetchCurrentQuest.pending, (state) => {
@@ -92,12 +118,14 @@ const questSlice = createSlice({
       })
       .addCase(fetchCurrentQuest.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentQuest = action.payload;
+        state.currentQuest = action.payload.data;
         state.error = null;
       })
-      .addCase(fetchCurrentQuest.rejected, (state) => {
+      .addCase(fetchCurrentQuest.rejected, (state, action) => {
         state.loading = false;
-        state.error = 'Не удалось загрузить текущее задание';
+        const errorMessage = action.payload as string;
+        state.error = errorMessage;
+        toast.error(errorMessage);
       })
       // Fetch completed quests cases
       .addCase(fetchCompletedQuests.pending, (state) => {
@@ -106,12 +134,14 @@ const questSlice = createSlice({
       })
       .addCase(fetchCompletedQuests.fulfilled, (state, action) => {
         state.loading = false;
-        state.completedQuests = action.payload;
+        state.completedQuests = action.payload.data;
         state.error = null;
       })
-      .addCase(fetchCompletedQuests.rejected, (state) => {
+      .addCase(fetchCompletedQuests.rejected, (state, action) => {
         state.loading = false;
-        state.error = 'Не удалось загрузить историю заданий';
+        const errorMessage = action.payload as string;
+        state.error = errorMessage;
+        toast.error(errorMessage);
       })
       // Complete quest cases
       .addCase(completeQuest.pending, (state) => {

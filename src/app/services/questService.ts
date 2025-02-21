@@ -28,30 +28,16 @@ export default class QuestService {
   ): Promise<AxiosResponse<ApiResponse<QuestCompletion>>> {
     const formData = new FormData();
 
-    // Append each image correctly
     for (const image of images) {
-      formData.append('images', image); // Correct way
+      formData.append('images', image);
     }
 
-    // Append description
     formData.append('description', description);
 
-    // Debugging: Log FormData
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
-    const response = await $api.post<ApiResponse<QuestCompletion>>(
-      `/quests/${userId}/complete`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    return $api.post<ApiResponse<QuestCompletion>>(`/quests/${userId}/complete`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
       },
-    );
-
-    console.log(response.data);
-    return response;
+    });
   }
 }

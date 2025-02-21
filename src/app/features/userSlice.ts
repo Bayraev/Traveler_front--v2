@@ -4,7 +4,6 @@ import type { ApiError } from '../../types/utils';
 import AuthService from '../services/authService';
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
-import { API_URL_STATIC } from '../http/http';
 
 interface UserState {
   currentUser: User | null;
@@ -27,11 +26,11 @@ export const signIn = createAsyncThunk(
   async (credentials: UserDTO, { rejectWithValue }) => {
     try {
       const response = await AuthService.login(credentials.username, credentials.password);
-      // Return the user data directly from response.data
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
-      const apiError = error.response?.data as ApiError;
-      const errorMessage = apiError?.error?.message || 'Не удалось войти в аккаунт';
+      const apiError = error.response?.data as ApiError['error'];
+      console.log(apiError);
+      const errorMessage = apiError?.message || 'Не удалось войти в систему';
       return rejectWithValue(errorMessage);
     }
   },
@@ -44,8 +43,8 @@ export const signUp = createAsyncThunk(
       const response = await AuthService.register(username, password, avatar);
       return response.data.data;
     } catch (error: any) {
-      const apiError = error.response?.data as ApiError;
-      const errorMessage = apiError?.error?.message || 'Не удалось зарегистрироваться';
+      const apiError = error.response?.data as ApiError['error'];
+      const errorMessage = apiError?.message || 'Не удалось зарегистрироваться';
       return rejectWithValue(errorMessage);
     }
   },
@@ -58,8 +57,8 @@ export const updateAvatar = createAsyncThunk(
       const response = await AuthService.updateAvatar(userId, avatar);
       return response.data.data;
     } catch (error: any) {
-      const apiError = error.response?.data as ApiError;
-      const errorMessage = apiError?.error?.message || 'Не удалось обновить аватар';
+      const apiError = error.response?.data as ApiError['error'];
+      const errorMessage = apiError?.message || 'Не удалось обновить аватар';
       return rejectWithValue(errorMessage);
     }
   },
@@ -71,11 +70,9 @@ const userSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.currentUser = null;
-      toast.success('Вы вышли из аккаунта');
-
-      // Remove user data from cookies
       Cookies.remove('username');
       Cookies.remove('password');
+      toast.success('Вы успешно вышли из системы');
     },
   },
   extraReducers: (builder) => {
@@ -86,26 +83,19 @@ const userSlice = createSlice({
       })
       .addCase(signIn.fulfilled, (state, action) => {
         state.loading = false;
-        toast.success('Успешно вошли в аккаунт!');
+        state.currentUser = action.payload.data;
+        state.error = null;
 
         // Save user data to cookies
-        Cookies.set('username', JSON.stringify(action.payload), { expires: 7 }); // 7 days expiry
-        Cookies.set('password', JSON.stringify(action.payload), { expires: 7 }); // 7 days expiry
+        Cookies.set('username', JSON.stringify(action.payload.data), { expires: 7 });
+        Cookies.set('password', JSON.stringify(action.payload.data), { expires: 7 });
 
-        const usernameCookie = Cookies.get('username');
-
-        // add user to state
-        state.currentUser = action.payload;
-        console.log(action.payload.avatar);
-        // state.currentUser.avatar = `${API_URL_STATIC}${action.payload.avatar}`;
-
-        console.log(usernameCookie, state.currentUser, action.payload);
+        toast.success(action.payload.message || 'Успешный вход в систему');
       })
       .addCase(signIn.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as string) || 'Не удалось войти в аккаунт';
-
-        toast.error((action.payload as string) || 'Не удалось войти в аккаунт');
+        const errorMessage = action.payload as string;
+        toast.error(errorMessage);
       });
 
     builder.addCase(signUp.pending, (state) => {
@@ -133,7 +123,6 @@ const userSlice = createSlice({
     builder.addCase(updateAvatar.fulfilled, (state, action) => {
       state.loading = false;
       state.currentUser = action.payload;
-      console.log(action.payload.avatar);
       toast.success('Аватар успешно обновлен');
     });
 
