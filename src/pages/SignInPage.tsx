@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signIn } from '../app/features/userSlice';
 import { Compass } from 'lucide-react';
@@ -12,9 +12,9 @@ const SignInPage = () => {
   const [error, setError] = useState('');
   const apiError = useSelector((state: RootState) => state.user.error);
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    alert('submit');
     e.preventDefault();
     setError('');
 
@@ -24,7 +24,12 @@ const SignInPage = () => {
       setError(apiError || 'Непредвиденная ошибка');
     }
 
-    await dispatch(signIn(credentials));
+    try {
+      await dispatch(signIn(credentials)).unwrap();
+      navigate('/');
+    } catch (error) {
+      // Error is already handled in the slice
+    }
   };
 
   return (

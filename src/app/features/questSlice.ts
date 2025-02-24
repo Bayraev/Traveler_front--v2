@@ -3,6 +3,7 @@ import type { Quest, QuestCompletion } from '../../types';
 import QuestService from '../services/questService';
 import { toast } from 'sonner';
 import type { ApiError } from '../../types/utils';
+import { setMapPosition } from './mapSlice';
 
 interface QuestState {
   currentQuest: Quest | null;
@@ -23,12 +24,23 @@ const initialState: QuestState = {
 // Fetch random quest
 export const rollNewQuest = createAsyncThunk(
   'quest/rollNew',
-  async (userId: string, { rejectWithValue }) => {
+  async (userId: string, { rejectWithValue, dispatch }) => {
     try {
       const response = await QuestService.getRandomQuest(userId);
-      return response.data;
+
+      if (dispatch) {
+        dispatch(
+          setMapPosition({
+            longitude: response.data.data.coordinates.longitude,
+            latitude: response.data.data.coordinates.latitude,
+            zoom: response.data.data.coordinates.zoom,
+          }),
+        );
+      }
+      return { ...response.data };
     } catch (error: any) {
       const apiError = error.response?.data as ApiError['error'];
+      console.log(error.message);
       const errorMessage = apiError?.message || 'Не удалось получить задание';
       return rejectWithValue(errorMessage);
     }
@@ -38,13 +50,25 @@ export const rollNewQuest = createAsyncThunk(
 // Fetch current active quest
 export const fetchCurrentQuest = createAsyncThunk(
   'quest/fetchCurrent',
-  async (userId: string, { rejectWithValue }) => {
+  async (userId: string, { rejectWithValue, dispatch }) => {
     try {
       const response = await QuestService.getCurrentQuest(userId);
-      return response.data;
+
+      if (dispatch) {
+        dispatch(
+          setMapPosition({
+            longitude: response.data.data.coordinates.longitude,
+            latitude: response.data.data.coordinates.latitude,
+            zoom: response.data.data.coordinates.zoom,
+          }),
+        );
+      }
+
+      return { ...response.data };
     } catch (error: any) {
       const apiError = error.response?.data as ApiError['error'];
-      const errorMessage = apiError?.message || 'Не удалось загрузить текущее задание';
+      let errorMessage = apiError?.message || 'Не удалось загрузить текущее задание';
+      console.log(error.message);
       return rejectWithValue(errorMessage);
     }
   },
@@ -103,6 +127,7 @@ const questSlice = createSlice({
         state.currentQuest = action.payload.data;
         state.isTaskPopupOpen = true;
         state.error = null;
+
         toast.success(action.payload.message || 'Новое задание получено');
       })
       .addCase(rollNewQuest.rejected, (state, action) => {
@@ -119,6 +144,7 @@ const questSlice = createSlice({
       .addCase(fetchCurrentQuest.fulfilled, (state, action) => {
         state.loading = false;
         state.currentQuest = action.payload.data;
+
         state.error = null;
       })
       .addCase(fetchCurrentQuest.rejected, (state, action) => {

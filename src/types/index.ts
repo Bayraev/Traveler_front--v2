@@ -37,6 +37,11 @@ export interface Quest {
   _id: ObjectId;
   country: string;
   city: string;
+  coordinates: {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  };
   description: string;
   photoUrl: string;
   coupon: string;

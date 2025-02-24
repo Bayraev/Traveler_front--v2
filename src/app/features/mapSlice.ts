@@ -5,7 +5,7 @@ import siteConfig from '../../config/siteConfig.json';
 const initialState: MapState = {
   longitude: siteConfig.map.defaultCenter.longitude,
   latitude: siteConfig.map.defaultCenter.latitude,
-  zoom: siteConfig.map.defaultZoom
+  zoom: siteConfig.map.defaultZoom,
 };
 
 const mapSlice = createSlice({
@@ -13,10 +13,14 @@ const mapSlice = createSlice({
   initialState,
   reducers: {
     setMapPosition: (state, action: PayloadAction<Partial<MapState>>) => {
-      return { ...state, ...action.payload };
+      Object.entries(action.payload).forEach(([key, value]) => {
+        if (value !== undefined && value !== state[key as keyof MapState]) {
+          state[key as keyof MapState] = value;
+        }
+      });
     },
-    resetMapPosition: () => initialState
-  }
+    resetMapPosition: () => initialState,
+  },
 });
 
 export const { setMapPosition, resetMapPosition } = mapSlice.actions;

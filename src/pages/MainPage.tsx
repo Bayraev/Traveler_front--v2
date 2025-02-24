@@ -6,9 +6,8 @@ import OSM from 'ol/source/OSM';
 import { fromLonLat } from 'ol/proj';
 import { AppDispatch, RootState } from '../app/store';
 import { setMapPosition } from '../app/features/mapSlice';
-import { rollNewQuest, closeTaskPopup, fetchCurrentQuest } from '../app/features/questSlice';
+import { rollNewQuest, closeTaskPopup } from '../app/features/questSlice';
 import { MapPinned } from 'lucide-react';
-import siteConfig from '../config/siteConfig.json';
 import { toast } from 'sonner';
 
 const MainPage = () => {
@@ -37,14 +36,14 @@ const MainPage = () => {
 
     const view = map.current.getView();
     view.on('change', () => {
+      console.log('change');
       const center = view.getCenter();
       if (center) {
-        const [longitude, latitude] = fromLonLat(center, 'EPSG:4326');
         dispatch(
           setMapPosition({
-            longitude,
-            latitude,
-            zoom: view.getZoom() || siteConfig.map.defaultZoom,
+            longitude: mapState.longitude,
+            latitude: mapState.latitude,
+            zoom: mapState.zoom,
           }),
         );
       }
@@ -56,7 +55,7 @@ const MainPage = () => {
         map.current = null;
       }
     };
-  }, []);
+  }, [mapState]);
 
   const handleRollTask = async () => {
     if (!currentUser?._id) {
@@ -67,16 +66,10 @@ const MainPage = () => {
     try {
       await dispatch(rollNewQuest(currentUser._id));
     } catch (error) {
+      console.log(error);
       toast.error('Не удалось выкрутить квест, непредвиденная ошибка..');
     }
   };
-
-  // Fetch current quest on component mount
-  useEffect(() => {
-    if (currentUser?._id) {
-      dispatch(fetchCurrentQuest(currentUser._id));
-    }
-  }, [currentUser?._id]);
 
   return (
     <div className="relative h-[calc(100vh-4rem)]">

@@ -29,7 +29,6 @@ export const signIn = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       const apiError = error.response?.data as ApiError['error'];
-      console.log(apiError);
       const errorMessage = apiError?.message || 'Не удалось войти в систему';
       return rejectWithValue(errorMessage);
     }

@@ -20,7 +20,6 @@ const FriendsPage = () => {
   const [selectedUser, setSelectedUser] = useState<Friend | null>(null);
 
   useEffect(() => {
-    console.log(currentUser);
     if (currentUser) {
       dispatch(fetchFriends(currentUser._id));
     }
