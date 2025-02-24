@@ -79,11 +79,7 @@ const friendSlice = createSlice({
       })
       .addCase(fetchFriends.fulfilled, (state, action) => {
         state.loading = false;
-        state.friends = action.payload.data.map((friend) => ({
-          ...friend,
-          avatar: `${API_URL_STATIC}${friend.avatar}`,
-        }));
-        state.error = null;
+        state.friends = action.payload.data;
         toast.success(action.payload.message || 'Список друзей загружен');
       })
       .addCase(fetchFriends.rejected, (state, action) => {

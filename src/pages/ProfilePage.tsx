@@ -151,7 +151,6 @@ const ProfilePage = () => {
                 <Users className="h-6 w-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Друзья</h3>
-                  <p className="text-sm text-gray-500">{user.friends.length} друзей</p>
                 </div>
               </Link>
 
@@ -161,7 +160,6 @@ const ProfilePage = () => {
                 <Trophy className="h-6 w-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Достижения</h3>
-                  <p className="text-sm text-gray-500">{user.completedQuests.length} выполнено</p>
                 </div>
               </Link>
             </div>
