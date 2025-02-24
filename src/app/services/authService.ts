@@ -14,12 +14,14 @@ export default class AuthService {
   static async register(
     username: string,
     password: string,
-    avatar: File,
+    avatar?: File,
   ): Promise<AxiosResponse<ApiResponse<User>>> {
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
-    formData.append('avatar', avatar);
+    if (avatar) {
+      formData.append('avatar', avatar);
+    }
 
     return $api.post<ApiResponse<User>>('/signup', formData, {
       headers: {

@@ -68,7 +68,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      <Toaster position="top-right" richColors />
+      <Toaster position="bottom-left" richColors />
     </div>
   );
 }

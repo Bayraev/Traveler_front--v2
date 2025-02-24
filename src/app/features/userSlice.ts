@@ -18,7 +18,7 @@ const initialState: UserState = {
 };
 
 interface SignUpPayload extends UserDTO {
-  avatar: File;
+  avatar?: File;
 }
 
 export const signIn = createAsyncThunk(

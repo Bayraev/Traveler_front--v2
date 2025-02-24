@@ -41,13 +41,13 @@ const SignUpPage = () => {
       return;
     }
 
-    if (!avatar) {
-      setError('Пожалуйста, добавьте аватар');
-      return;
-    }
+    // if (!avatar) {
+    //   setError('Пожалуйста, добавьте аватар');
+    //   return;
+    // }
 
     try {
-      await dispatch(signUp({ username, password, avatar })).unwrap();
+      await dispatch(signUp({ username, password, avatar: avatar || undefined })).unwrap();
       navigate('/');
     } catch (err) {
       setError(err as string);
