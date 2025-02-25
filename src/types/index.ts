@@ -53,6 +53,7 @@ export interface QuestCompletion {
   country: string;
   city: string;
   description: string;
+  comment: string;
   photoUrl: string;
   images: string[];
   coupon: string;

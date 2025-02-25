@@ -48,24 +48,23 @@ const QuestsPage = () => {
                   )}
                 </div>
                 <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-[0.2px]">
                     <h3 className="text-lg font-semibold text-gray-900">Задание выполнено</h3>
                     <span className="text-sm text-gray-500">
-                      {/* {new Date(completion.completedAt).toLocaleDateString('ru-RU')} */}
+                      {new Date(completion.completionDate).toLocaleDateString('ru-RU')}
                     </span>
                   </div>
-                  {completion.description && (
-                    <p className="text-gray-600 mb-4">{completion.description}</p>
-                  )}
+                  <p className="text-gray-600 mb-2">{completion.description}</p>
+                  <p className="text-gray-600 mb-2 text-lg">{completion.comment}</p>
                   <div className="flex flex-wrap gap-2">
-                    {/* {completion.photos?.slice(1).map((photo, index) => (
-                      
-                    ))} */}
-                    <img
-                      src={completion.photoUrl}
-                      alt={completion.description}
-                      className="w-16 h-16 object-cover rounded"
-                    />
+                    {completion.images?.slice(1).map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={completion.comment}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                    ))}
                   </div>
                 </div>
               </div>

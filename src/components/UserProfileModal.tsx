@@ -54,10 +54,11 @@ const UserProfileModal = ({ user, completedQuests, isOpen, onClose }: UserProfil
                       <h4 className="font-semibold">
                         {quest.country}, {quest.city}
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1">{quest.description}</p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        {/* Выполнено: {new Date(quest.completedAt).toLocaleDateString('ru-RU')} */}
+                      <p className="text-sm text-gray-600 mt-[0.2px]">{quest.description}</p>
+                      <p className="text-sm text-gray-500 mt-[0.2px]">
+                        Выполнено: {new Date(quest.completionDate).toLocaleDateString('ru-RU')}
                       </p>
+                      <p className="text-gray-600 mb-2">{quest.comment}</p>
                       {quest.images.length > 1 && (
                         <div className="flex gap-2 mt-2">
                           {quest.images.slice(1).map((photo, index) => (
